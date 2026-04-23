@@ -8,53 +8,69 @@
 
       <!-- Entregador -->
       <l-marker :lat-lng="driverPosition" :icon="driverIcon" />
+      <l-circle :lat-lng="driverPosition" :radius="30" />
 
       <!-- Cliente -->
-      <l-marker :lat-lng="clientPosition" :icon="clientIcon" />
+      <!-- <l-marker :lat-lng="clientPosition" :icon="clientIcon" /> -->
     </l-map>
   </q-page>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue';
-import { LMap, LTileLayer, LMarker } from '@vue-leaflet/vue-leaflet';
+import { LMap, LTileLayer, LMarker, LCircle } from '@vue-leaflet/vue-leaflet';
 import L from 'leaflet';
 
-// 📍 Centro inicial (São Gonçalo)
+// 📍 Centro inicial
 const center = ref<[number, number]>([-22.826, -43.053]);
-const zoom = ref(13);
+const zoom = ref(17);
 
-// 📦 Posição do cliente (fixa)
-const clientPosition = ref<[number, number]>([-22.836, -43.063]);
+// 📦 Cliente (fixo)
+// const clientPosition = ref<[number, number]>([-22.836, -43.063]);
 
-// 🛵 Posição do entregador (dinâmica)
+// 🛵 Entregador
 const driverPosition = ref<[number, number]>([-22.826, -43.053]);
 
-// 🎯 Ícone do entregador
+// 🛵 você (entregador)
 const driverIcon = L.icon({
-  iconUrl: 'https://cdn-icons-png.flaticon.com/512/149/149059.png',
+  iconUrl: 'https://cdn-icons-png.flaticon.com/512/61/61168.png', // ícone diferente
   iconSize: [32, 32],
 });
 
-// 🏠 Ícone do cliente
-const clientIcon = L.icon({
-  iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
-  iconSize: [32, 32],
-});
+// // 🏠 cliente
+// const clientIcon = L.icon({
+//   iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
+//   iconSize: [32, 32],
+// });
 
-// 🔄 Simulação de movimento do entregador
+// 📡 GPS REAL
 onMounted(() => {
-  setInterval(() => {
-    driverPosition.value = [
-      driverPosition.value[0] + (Math.random() - 0.5) * 0.001,
-      driverPosition.value[1] + (Math.random() - 0.5) * 0.001,
-    ];
-  }, 2000);
+  if (!navigator.geolocation) {
+    console.error('Geolocalização não suportada');
+    return;
+  }
+
+  navigator.geolocation.watchPosition(
+    (pos) => {
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
+
+      driverPosition.value = [lat, lng];
+    },
+    (err) => {
+      console.error(err);
+    },
+    {
+      enableHighAccuracy: true,
+      maximumAge: 0,
+      timeout: 5000,
+    },
+  );
 });
 
-// 🎯 Centraliza o mapa no entregador
+// 🎯 Centraliza mapa no entregador
 watch(driverPosition, (newPos) => {
-  center.value = newPos;
+  center.value = [(center.value[0] + newPos[0]) / 2, (center.value[1] + newPos[1]) / 2];
 });
 </script>
 
