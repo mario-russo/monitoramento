@@ -18,6 +18,10 @@ const routes: RouteRecordRaw[] = [
         path: 'entregador/:id',
         component: () => import('pages/EntregadorTrackingPage.vue'),
       },
+      {
+        path: 'fake',
+        component: () => import('pages/TrackingFake.vue'),
+      },
     ],
   },
 
