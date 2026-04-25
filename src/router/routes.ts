@@ -14,6 +14,10 @@ const routes: RouteRecordRaw[] = [
         path: '',
         component: () => import('pages/TrackingPage.vue'),
       },
+      {
+        path: 'entregador/:id',
+        component: () => import('pages/EntregadorTrackingPage.vue'),
+      },
     ],
   },
 
